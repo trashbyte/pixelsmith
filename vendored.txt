@@ -1,0 +1,11 @@
+imgui-rs/imgui-rs
+    licensed under Apache 2.0 / MIT dual license
+    from commit main/f58744e57949ade294d87fc9798502675a2fd4d5
+
+Yatekii/imgui-wgpu-rs
+	licensed under Apache 2.0 / MIT dual license
+	from commit master/fb2858db38ea38c3de89c1e6999638e07b3ed756
+
+trashbyte/toolbelt
+	licensed under MIT license
+	from commit master/523ee348abb8cdaccfd83f0976098447aa3889a2

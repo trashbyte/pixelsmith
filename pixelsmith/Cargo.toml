@@ -1,0 +1,18 @@
+[package]
+name = "pixelsmith"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+imgui = { path = "../imgui-rs/imgui", features = [ "docking", "tables-api" ] }
+imgui-sys = { path = "../imgui-rs/imgui-sys", features = [ "docking" ] }
+imgui-wgpu = { path = "../imgui-wgpu-rs" }
+wgpu = "0.12"
+imgui-winit-support = { path = "../imgui-rs/imgui-winit-support", default-features = false, features = ["winit-26"] }
+pollster = "0.2"
+winit = "0.26"
+bytemuck = { version = "1.4", features = ["derive"] }
+image = { version = "0.24", default-features = false, features = ["png"] }
+toolbelt = { path = "../toolbelt" }
+num = "0.4"
+cgmath = "0.18"
