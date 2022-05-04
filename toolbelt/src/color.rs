@@ -29,6 +29,8 @@ macro_rules! const_color_fn {
     }
 }
 
+
+#[rustversion::attr(nightly, feature(split_array))]
 impl Color {
     const_color_fn! { black => RGB(0.0, 0.0, 0.0) HSL(0.0, 0.0, 0.0) HSV(0.0, 0.0, 0.0) Lab(0.0, 0.0, 0.0) }
     const_color_fn! { white => RGB(1.0, 1.0, 1.0) HSL(0.0, 0.0, 1.0) HSV(0.0, 0.0, 1.0) Lab(1.0, 0.0, 0.0) }
@@ -62,9 +64,19 @@ impl Color {
         [(a*256.0).floor() as u8, (b*256.0).floor() as u8, (c*256.0).floor() as u8, (d*256.0).floor() as u8]
     }
 
+    // stable: unsafe implementation
+    #[rustversion::not(nightly)]
     pub fn components_3(&self) -> &[f32; 3] { unsafe { &*(self.components.as_ptr() as *const [f32; 3]) } }
-    pub fn components_4(&self) -> &[f32; 4] { &self.components }
+    #[rustversion::not(nightly)]
     pub fn components_3_mut(&mut self) -> &mut [f32; 3] { unsafe { &mut *(self.components.as_mut_ptr() as *mut [f32; 3]) } }
+
+    // nightly: safer implementation with feature(split_array)
+    #[rustversion::nightly]
+    pub fn components_3(&self) -> &[f32; 3] { &self.components[0..=2].split_array_ref().0 }
+    #[rustversion::nightly]
+    pub fn components_3_mut(&mut self) -> &mut [f32; 3] { &self.components[0..=2].split_array_mut().0 }
+
+    pub fn components_4(&self) -> &[f32; 4] { &self.components }
     pub fn components_4_mut(&mut self) -> &mut [f32; 4] { &mut self.components }
 
     /// Converts this Color into a different ColorSpace *in-place*.
