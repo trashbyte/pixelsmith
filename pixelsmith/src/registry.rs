@@ -1,6 +1,23 @@
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
+
+#[repr(transparent)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct TextureKey(usize);
+
+
+#[derive(Debug, Clone)]
+pub struct TextureMapSet {
+    pub albedo: TextureKey,
+    pub ao: TextureKey,
+    pub normal: TextureKey,
+    pub specular: TextureKey,
+    pub height: TextureKey,
+    pub extras: Vec<TextureKey>,
+}
+
+
 #[derive(Debug)]
 pub struct TextureInfoInner {
     device: Arc<wgpu::Device>,

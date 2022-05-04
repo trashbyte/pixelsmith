@@ -16,3 +16,4 @@ image = { version = "0.24", default-features = false, features = ["png"] }
 toolbelt = { path = "../toolbelt" }
 num = "0.4"
 cgmath = "0.18"
+yaml-rust = "0.4.5"

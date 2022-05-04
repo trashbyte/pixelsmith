@@ -24,7 +24,9 @@ pub struct Light {
 }
 
 
-pub(crate) struct Canvas {
+// TODO: make quick canvas rendering as simple as possible e.g. for previews
+//       Canvas::new(params...).render(...)
+pub struct Canvas {
     canvas_size: (u32, u32),
     rt_size: (u32, u32),
     sprite_pipeline: CanvasSpritePipeline,
@@ -94,28 +96,28 @@ impl Canvas {
                                               TextureFormat::Rgba8Unorm,
                                               TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST,
                                               &device);
-        albedo_texture.write(&queue, &image::io::Reader::open("tex/albedo.png").unwrap().decode().unwrap().to_rgba8().into_vec()[..], canvas_size.0, canvas_size.1);
+        albedo_texture.write(&queue, &image::io::Reader::open("project/sprites/bricks/albedo.png").unwrap().decode().unwrap().to_rgba8().into_vec()[..], canvas_size.0, canvas_size.1);
         registry.add("albedo", &albedo_texture);
 
         let normal_texture = TextureInfo::new(canvas_size, "canvas normal texture",
                                               TextureFormat::Rgba8Unorm,
                                               TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST,
                                               &device);
-        normal_texture.write(&queue, &image::io::Reader::open("tex/normal.png").unwrap().decode().unwrap().to_rgba8().into_vec()[..], canvas_size.0, canvas_size.1);
+        normal_texture.write(&queue, &image::io::Reader::open("project/sprites/bricks/normal.png").unwrap().decode().unwrap().to_rgba8().into_vec()[..], canvas_size.0, canvas_size.1);
         registry.add("normal", &normal_texture);
 
         let roughness_texture = TextureInfo::new(canvas_size, "canvas roughness texture",
                                               TextureFormat::Rgba8Unorm,
                                               TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST,
                                               &device);
-        roughness_texture.write(&queue, &image::io::Reader::open("tex/roughness.png").unwrap().decode().unwrap().to_rgba8().into_vec()[..], canvas_size.0, canvas_size.1);
+        roughness_texture.write(&queue, &image::io::Reader::open("project/sprites/bricks/roughness.png").unwrap().decode().unwrap().to_rgba8().into_vec()[..], canvas_size.0, canvas_size.1);
         registry.add("roughness", &roughness_texture);
 
         let height_texture = TextureInfo::new(canvas_size, "canvas height texture",
                                               TextureFormat::Rgba8Unorm,
                                               TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST,
                                               &device);
-        height_texture.write(&queue, &image::io::Reader::open("tex/height.png").unwrap().decode().unwrap().to_rgba8().into_vec()[..], canvas_size.0, canvas_size.1);
+        height_texture.write(&queue, &image::io::Reader::open("project/sprites/bricks/height.png").unwrap().decode().unwrap().to_rgba8().into_vec()[..], canvas_size.0, canvas_size.1);
         registry.add("height", &height_texture);
 
         let maps_bind_group = Arc::new(device.create_bind_group(&BindGroupDescriptor {

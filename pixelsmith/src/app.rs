@@ -15,6 +15,7 @@ use toolbelt::normalize_with_constant;
 use toolbelt::once::DoOnce;
 use crate::canvas::Canvas;
 use crate::palette::PaletteEditor;
+use crate::recent::draw_recent_window;
 use crate::registry::TextureRegistry;
 
 
@@ -37,7 +38,9 @@ impl std::fmt::Display for MapType {
 }
 
 
+struct ProjectData;
 pub struct App {
+    project: Option<ProjectData>,
     demo_open: bool,
     window: Window,
     surface: wgpu::Surface,
@@ -100,14 +103,29 @@ impl App {
         );
         imgui_ctx.set_ini_filename(None);
 
-        let font_size = (13.0 * hidpi_factor) as f32;
         imgui_ctx.io_mut().font_global_scale = (1.0 / hidpi_factor) as f32;
 
+        imgui_ctx.fonts().add_font(&[FontSource::TtfData {
+            data: include_bytes!("../../resources/MerriweatherSans-Light.ttf"),
+            size_pixels: (14.0 * hidpi_factor) as f32,
+            config: Some(FontConfig {
+                name: Some("Merriweather Sans 14px".to_string()),
+                oversample_h: 4,
+                oversample_v: 4,
+                pixel_snap_h: true,
+                size_pixels: (14.0 * hidpi_factor) as f32,
+                rasterizer_multiply: 1.0,
+                glyph_extra_spacing: [1.1, 0.0],
+                ..Default::default()
+            })
+        }]);
         imgui_ctx.fonts().add_font(&[FontSource::DefaultFontData {
             config: Some(imgui::FontConfig {
+                name: Some("Proggy Clean 13px".to_string()),
                 oversample_h: 1,
+                oversample_v: 1,
                 pixel_snap_h: true,
-                size_pixels: font_size,
+                size_pixels: (13.0 * hidpi_factor) as f32,
                 ..Default::default()
             }),
         }]);
@@ -124,6 +142,7 @@ impl App {
         imgui_ctx.set_ini_filename(Some(PathBuf::from("settings.ini")));
 
         App {
+            project: None,
             demo_open: false,
             window, surface, device, queue, canvas, imgui_platform, imgui_renderer, imgui_ctx,
             texture_registry: registry,
@@ -184,7 +203,14 @@ impl App {
                     .expect("Failed to prepare frame");
                 let ui = self.imgui_ctx.new_frame();
 
-                {
+                if self.project.is_none() {
+                    let size = self.window.inner_size();
+                    if let Some((name, path)) = draw_recent_window(ui, [size.width as f32, size.height as f32]) {
+                        println!("selected {} {}", name, path);
+                        self.project = Some(ProjectData{});
+                    }
+                }
+                else {
                     let root_dockspace_id = ui.dockspace_over_viewport(DockNodeFlags::PASSTHRU_CENTRAL_NODE);
 
                     ui.main_menu_bar(|| {

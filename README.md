@@ -12,3 +12,5 @@ For ease of development, the following repos have been vendored:
 * trashbyte/toolbelt (MIT license)
 
 For more info, see `vendored.txt`. To avoid having to deal with submodules or recursive git jank from nested repos, the vendored repos are present sans `.git[hub]` folders. The first commit to this repo has the repos unmodified aside from this removal, so `git diff 5b0ab06 HEAD -- . ":!pixelsmith"` should show just all of the changes I made to them.
+
+Merriweather Sans is licensed under the Open Font License. See `resources/OFL.txt` for the full license.
