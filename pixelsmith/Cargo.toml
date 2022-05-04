@@ -8,7 +8,7 @@ imgui = { path = "../imgui-rs/imgui", features = [ "docking", "tables-api" ] }
 imgui-sys = { path = "../imgui-rs/imgui-sys", features = [ "docking" ] }
 imgui-wgpu = { path = "../imgui-wgpu-rs" }
 wgpu = "0.12"
-imgui-winit-support = { path = "../imgui-rs/imgui-winit-support", default-features = false, features = ["winit-26"] }
+imgui-winit-support = { path = "../imgui-rs/imgui-winit-support" }
 pollster = "0.2"
 winit = "0.26"
 bytemuck = { version = "1.4", features = ["derive"] }

@@ -13,3 +13,4 @@ keywords = ["tools", "utilities", "utils"]
 cgmath = { version = "0.17.0", features = [ "swizzle" ] }
 noise = "0.6.0"
 walkdir = "2.3.1"
+num = "0.4"

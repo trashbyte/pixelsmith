@@ -57,6 +57,8 @@ mod string;
 #[macro_use]
 mod tokens;
 
+pub mod docking;
+
 mod clipboard;
 pub mod color;
 mod columns;

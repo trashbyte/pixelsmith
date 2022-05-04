@@ -1,15 +1,25 @@
-extern crate cgmath;
-
 use cgmath::{Vector3, Matrix4, Deg, Point3, dot, EuclideanSpace, Transform as CgTransform};
+use num::traits::real::Real;
 
 pub mod aabb;
+
 pub mod color;
+pub use color::{Color, ColorSpace};
+
 pub mod noise;
+
 pub mod transform;
+pub use transform::Transform;
+
 pub mod paths;
+
 pub mod curve;
 
-pub use transform::Transform;
+pub mod rect;
+pub use rect::Rect;
+
+pub mod once;
+
 
 
 #[derive(Copy, Clone, Debug)]
@@ -118,3 +128,69 @@ pub fn format_bytes(bytes: u32, digits: u32) -> String {
     }
 }
 
+/// Normalizes a 3-vector with one value that stays constant.
+/// e.g. (*0.6*, 0.4, 0.8) => (*0.6*, 0.2, 0.4)
+/// Only tested with all-positive vectors, may misbehave when negatives are involved.
+pub fn normalize_with_constant(constant: f32, mut a: f32, mut b: f32) -> (f32, f32, f32) {
+    let difference = 1.0 - (constant + a + b);
+    let mut ratio_a = (a / (a + b)).max(0.001);
+    let mut ratio_b = (b / (a + b)).max(0.001);
+    if ratio_a.is_infinite() || ratio_a.is_nan() || ratio_b.is_infinite() || ratio_b.is_nan() {
+        ratio_a = 0.5;
+        ratio_b = 0.5;
+    }
+    let da = difference * ratio_a;
+    let db = difference * ratio_b;
+
+    if a < 0.0 {
+        a = (a + da).clamp(-1.0, 0.0);
+    }
+    else {
+        a = (a + da).clamp(0.0, 1.0);
+    }
+
+    if b < 0.0 {
+        b = (b + db).clamp(-1.0, 0.0);
+    }
+    else {
+        b = (b + db).clamp(0.0, 1.0);
+    }
+
+    (constant, a, b)
+}
+
+pub fn slice_max<T: Real>(slice: &[T]) -> T {
+    if slice.len() == 0 { panic!("Can't get the maximum of an empty slice!") }
+    let mut max = slice[0];
+    for i in 1..slice.len() {
+        max = max.max(slice[i]);
+    }
+    max
+}
+
+pub fn slice_min<T: Real>(slice: &[T]) -> T {
+    if slice.len() == 0 { panic!("Can't get the minimum of an empty slice!") }
+    let mut min = slice[0];
+    for i in 1..slice.len() {
+        min = min.min(slice[i]);
+    }
+    min
+}
+
+pub fn array_max<const N: usize, T: Real>(array: [T; N]) -> T {
+    if N == 0 { panic!("Can't get the maximum of an empty array!") }
+    let mut max = array[0];
+    for i in 1..N {
+        max = max.max(array[i]);
+    }
+    max
+}
+
+pub fn array_min<const N: usize, T: Real>(array: [T; N]) -> T {
+    if N == 0 { panic!("Can't get the minimum of an empty array!") }
+    let mut min = array[0];
+    for i in 1..N {
+        min = min.min(array[i]);
+    }
+    min
+}

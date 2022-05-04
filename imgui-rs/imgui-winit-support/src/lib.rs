@@ -343,11 +343,11 @@ impl WinitPlatform {
             // we might never see the release event if some other window gets focus.
             Event::DeviceEvent {
                 event:
-                    DeviceEvent::Key(KeyboardInput {
-                        state: ElementState::Released,
-                        virtual_keycode: Some(key),
-                        ..
-                    }),
+                DeviceEvent::Key(KeyboardInput {
+                                     state: ElementState::Released,
+                                     virtual_keycode: Some(key),
+                                     ..
+                                 }),
                 ..
             } => {
                 io.keys_down[key as usize] = false;
@@ -385,11 +385,11 @@ impl WinitPlatform {
             }
             WindowEvent::KeyboardInput {
                 input:
-                    KeyboardInput {
-                        virtual_keycode: Some(key),
-                        state,
-                        ..
-                    },
+                KeyboardInput {
+                    virtual_keycode: Some(key),
+                    state,
+                    ..
+                },
                 ..
             } => {
                 let pressed = state == ElementState::Pressed;

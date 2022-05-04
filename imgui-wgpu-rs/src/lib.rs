@@ -5,6 +5,7 @@ use smallvec::SmallVec;
 use std::fmt;
 use std::mem::size_of;
 use std::{error::Error, num::NonZeroU32};
+use std::sync::Arc;
 use wgpu::util::{BufferInitDescriptor, DeviceExt};
 use wgpu::*;
 
@@ -108,7 +109,7 @@ impl<'a> Default for TextureConfig<'a> {
 pub struct Texture {
     texture: wgpu::Texture,
     view: wgpu::TextureView,
-    bind_group: BindGroup,
+    bind_group: Arc<BindGroup>,
     size: Extent3d,
 }
 
@@ -117,7 +118,7 @@ impl Texture {
     pub fn from_raw_parts(
         texture: wgpu::Texture,
         view: wgpu::TextureView,
-        bind_group: BindGroup,
+        bind_group: Arc<BindGroup>,
         size: Extent3d,
     ) -> Self {
         Self {
@@ -166,9 +167,13 @@ impl Texture {
         Self {
             texture,
             view,
-            bind_group,
+            bind_group: Arc::new(bind_group),
             size: config.size,
         }
+    }
+
+    pub fn replace_bind_group(&mut self, new_bg: &Arc<BindGroup>) {
+        self.bind_group = new_bg.clone();
     }
 
     /// Write `data` to the texture.
@@ -230,6 +235,11 @@ impl Texture {
     /// The `wgpu::TextureView` of the underlying texture.
     pub fn view(&self) -> &wgpu::TextureView {
         &self.view
+    }
+
+    /// The `wgpu::TextureView` of the underlying texture.
+    pub fn bind_group(&self) -> &wgpu::BindGroup {
+        &self.bind_group
     }
 }
 
@@ -395,7 +405,6 @@ impl Renderer {
             push_constant_ranges: &[],
         });
 
-        // Create the render pipeline.
         // Create the render pipeline.
         let pipeline = device.create_render_pipeline(&RenderPipelineDescriptor {
             label: Some("imgui-wgpu pipeline"),
