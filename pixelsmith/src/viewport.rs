@@ -8,6 +8,7 @@ use crate::app::MapType;
 use crate::{GLOBALS, Toggle};
 use crate::pipeline::{COLOR_TARGET_STATE, ViewportLightGizmoPipeline, ViewportSpritePipeline};
 use crate::pipeline::sprite::CanvasSpritePipelineUniforms;
+use crate::property::Property;
 use crate::registry::{RegistryKey, TextureRegistry};
 use crate::scene::Scene;
 
@@ -27,7 +28,7 @@ pub struct Viewport {
     drag_state: DragState<MouseButton>,
     is_hovered: bool,
     pub bounds: Rect<f32>,
-    pub light_gizmos_interactable: bool,
+    pub light_gizmos_interactable: Property<bool>,
     pub gizmo_opacity: f32,
     pub shown_map_type: MapType,
     camera_height: f32,
@@ -75,7 +76,7 @@ impl Viewport {
             drag_state: DragState::new(),
             is_hovered: false,
             bounds: Rect::default(),
-            light_gizmos_interactable: true,
+            light_gizmos_interactable: Property::new(true),
             gizmo_opacity: 0.02,
             shown_map_type: MapType::Rendered,
             camera_height: 25.0,
@@ -183,7 +184,7 @@ impl Viewport {
                 let canvas_pos = self.transform_screen_to_canvas(
                     (position.x as f32 - self.bounds.x, position.y as f32 - self.bounds.y).into());
                 let light_distance = canvas_pos.distance(light.position.into());
-                light.gizmo_hovered = self.light_gizmos_interactable
+                light.gizmo_hovered = self.light_gizmos_interactable.get()
                     && light_distance < (6.25 * (light.height / 100.0)).max(2.0);
             }
             Event::WindowEvent { event: WindowEvent::MouseWheel { delta, phase: TouchPhase::Moved, .. }, .. } => {

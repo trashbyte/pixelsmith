@@ -393,14 +393,18 @@ impl App {
                                             ui.text("Light Control");
                                             {
                                                 let vp = self.viewports[num].as_mut().unwrap();
-                                                ui.checkbox("Gizmo Interactable", &mut vp.light_gizmos_interactable);
+
+                                                vp.light_gizmos_interactable.bind(|dummy| {
+                                                    ui.checkbox("Gizmo Interactable", dummy);
+                                                });
+
                                                 if ui.slider_config("Opacity##light-gizmo", 0.005, 1.0)
                                                     .flags(SliderFlags::LOGARITHMIC)
                                                     .build(&mut vp.gizmo_opacity)
                                                 {
                                                     if vp.gizmo_opacity < 0.005 + f32::EPSILON {
                                                         vp.gizmo_opacity = 0.0;
-                                                        vp.light_gizmos_interactable = false;
+                                                        vp.light_gizmos_interactable.set(false);
                                                     }
                                                 }
                                             }
