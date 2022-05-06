@@ -1,3 +1,4 @@
+use binder::Property;
 use toolbelt::cgmath::{MetricSpace, Point2, Vector2};
 use wgpu::*;
 use winit::event::{ElementState, Event, KeyboardInput, MouseButton, MouseScrollDelta, TouchPhase, VirtualKeyCode, WindowEvent};
@@ -8,7 +9,6 @@ use crate::app::MapType;
 use crate::{GLOBALS, Toggle};
 use crate::pipeline::{COLOR_TARGET_STATE, ViewportLightGizmoPipeline, ViewportSpritePipeline};
 use crate::pipeline::sprite::CanvasSpritePipelineUniforms;
-use crate::property::Property;
 use crate::registry::{RegistryKey, TextureRegistry};
 use crate::scene::Scene;
 
@@ -29,7 +29,7 @@ pub struct Viewport {
     is_hovered: bool,
     pub bounds: Rect<f32>,
     pub light_gizmos_interactable: Property<bool>,
-    pub gizmo_opacity: f32,
+    pub gizmo_opacity: Property<f32>,
     pub shown_map_type: MapType,
     camera_height: f32,
     pub global_ambient: f32,
@@ -77,7 +77,7 @@ impl Viewport {
             is_hovered: false,
             bounds: Rect::default(),
             light_gizmos_interactable: Property::new(true),
-            gizmo_opacity: 0.02,
+            gizmo_opacity: Property::new(0.02),
             shown_map_type: MapType::Rendered,
             camera_height: 25.0,
             global_ambient: 0.05,
@@ -184,7 +184,7 @@ impl Viewport {
                 let canvas_pos = self.transform_screen_to_canvas(
                     (position.x as f32 - self.bounds.x, position.y as f32 - self.bounds.y).into());
                 let light_distance = canvas_pos.distance(light.position.into());
-                light.gizmo_hovered = self.light_gizmos_interactable.get()
+                light.gizmo_hovered = *self.light_gizmos_interactable.bind()
                     && light_distance < (6.25 * (light.height / 100.0)).max(2.0);
             }
             Event::WindowEvent { event: WindowEvent::MouseWheel { delta, phase: TouchPhase::Moved, .. }, .. } => {
@@ -321,7 +321,7 @@ impl Viewport {
 
         let mut gizmo_color = l.color;
         gizmo_color.components_4_mut()[3] =
-            if l.gizmo_hovered { self.gizmo_opacity * 2.0 } else { self.gizmo_opacity };
+            if l.gizmo_hovered { *self.gizmo_opacity.bind() * 2.0 } else { *self.gizmo_opacity.bind() };
         self.light_gizmo_pipeline.update_uniforms(&matrix, gizmo_color);
         self.light_gizmo_pipeline.render(encoder, registry);
     }

@@ -11,7 +11,6 @@ mod sprite;
 mod viewport;
 mod imgui_wgpu;
 mod panel;
-mod property;
 
 
 trait Toggle {

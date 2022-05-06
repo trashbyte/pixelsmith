@@ -1,4 +1,5 @@
 use std::cell::RefCell;
+use std::ops::DerefMut;
 use imgui::*;
 use std::time::Instant;
 use winit::{
@@ -11,6 +12,7 @@ use winit::event_loop::EventLoopWindowTarget;
 use imgui::docking::DockNodeFlags;
 use toolbelt::{SimpleCell, Defer, normalize_with_constant};
 use toolbelt::once::DoOnce;
+use binder::PropertyBinding;
 use crate::GLOBALS;
 use crate::viewport::Viewport;
 use crate::palette::PaletteEditor;
@@ -393,18 +395,17 @@ impl App {
                                             ui.text("Light Control");
                                             {
                                                 let vp = self.viewports[num].as_mut().unwrap();
+                                                let mut bind = vp.light_gizmos_interactable.bind();
+                                                ui.checkbox("Gizmo Interactable", &mut bind);
 
-                                                vp.light_gizmos_interactable.bind(|dummy| {
-                                                    ui.checkbox("Gizmo Interactable", dummy);
-                                                });
-
+                                                let mut opacity_bind = vp.gizmo_opacity.bind();
                                                 if ui.slider_config("Opacity##light-gizmo", 0.005, 1.0)
                                                     .flags(SliderFlags::LOGARITHMIC)
-                                                    .build(&mut vp.gizmo_opacity)
+                                                    .build(&mut opacity_bind)
                                                 {
-                                                    if vp.gizmo_opacity < 0.005 + f32::EPSILON {
-                                                        vp.gizmo_opacity = 0.0;
-                                                        vp.light_gizmos_interactable.set(false);
+                                                    if *opacity_bind < 0.005 + f32::EPSILON {
+                                                        *opacity_bind = 0.0;
+                                                        *bind = false;
                                                     }
                                                 }
                                             }
