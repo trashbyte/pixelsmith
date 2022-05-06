@@ -1,12 +1,13 @@
 use std::ops::{Index, IndexMut, Range};
+use serde_derive::{Serialize, Deserialize};
 use crate::{slice_max, slice_min};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ColorSpace {
     RGB, RGBA, HSL, HSLA, HSV, HSVA, Lab, LabA,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct Color {
     components: [f32; 4],
     space: ColorSpace
@@ -58,6 +59,8 @@ impl Color {
             ColorSpace::RGBA | ColorSpace::HSLA | ColorSpace::HSVA | ColorSpace::LabA => Some(self.components[3])
         }
     }
+
+    pub fn alpha(&self) -> f32 { self.components[3] }
 
     pub fn as_bytes(self) -> [u8; 4] {
         let [a, b, c, d] = self.components;

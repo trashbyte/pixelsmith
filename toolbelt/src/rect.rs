@@ -34,4 +34,12 @@ impl<N: Num + NumCast + Copy + PartialOrd> Rect<N> {
     pub fn expanded_by(&self, expand_x: N, expand_y: N) -> Rect<N> {
         self.adjusted_by(expand_x * _cast(-1.0), expand_x * _cast(-1.0), expand_y * _cast(2.0), expand_y * _cast(2.0))
     }
+
+    pub fn position(&self) -> cgmath::Point2<N> {
+        cgmath::Point2::new(self.x, self.y)
+    }
+
+    pub fn size(&self) -> cgmath::Vector2<N> {
+        cgmath::Vector2::new(self.x, self.y)
+    }
 }

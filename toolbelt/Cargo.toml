@@ -10,7 +10,9 @@ categories = ["development-tools", "game-development"]
 keywords = ["tools", "utilities", "utils"]
 
 [dependencies]
-cgmath = { version = "0.17", features = [ "swizzle" ] }
+cgmath = { version = "0.18", features = [ "swizzle", "serde" ] }
+serde = "1.0"
+serde_derive = "1.0"
 noise = "0.6"
 walkdir = "2.3"
 num = "0.4"

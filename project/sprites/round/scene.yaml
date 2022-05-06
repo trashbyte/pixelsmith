@@ -1,0 +1,24 @@
+---
+viewports_open: [true, false, false, false]
+lighting:
+  enable_light_parallax: false
+  global_ambient: 0.05
+  global_diffuse: 0.475
+  global_specular: 0.475
+  lights:
+    - position:
+        x: -16.0
+        y: -16.0
+      height: 50.0
+      color:
+        components:
+          - 1.0
+          - 1.0
+          - 1.0
+          - 2.0
+        space: RGBA
+      gizmo_hovered: false
+      falloff_exp: 2.0
+      enable_falloff: true
+      diffuse: 1.0
+      specular: 1.0

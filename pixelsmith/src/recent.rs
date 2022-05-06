@@ -1,5 +1,4 @@
-use std::path::{Path, PathBuf};
-use yaml_rust::YamlLoader;
+use std::path::Path;
 use imgui::{Condition, WindowFlags};
 
 pub fn draw_recent_window(ui: &imgui::Ui, size: [f32; 2]) -> Option<(String, String)> {

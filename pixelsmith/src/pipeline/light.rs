@@ -1,26 +1,27 @@
+use std::sync::Arc;
 use wgpu::*;
-use imgui::TextureId;
-use imgui_wgpu::Renderer;
 use crate::geometry::{VertexGroup, VertexPos, VertexPosPod};
+use crate::GLOBALS;
 use crate::pipeline::{COLOR_TARGET_STATE, PRIMITIVE_STATE, SimpleGeometryPipeline};
-use crate::registry::TextureRegistry;
+use crate::registry::{RegistryKey, TextureRegistry};
 
 
-pub struct CanvasLightPipeline {
+pub struct ViewportLightGizmoPipeline {
     uniform_buffer: wgpu::Buffer,
     uniform_bind_group: wgpu::BindGroup,
     gizmo_vg: VertexGroup,
     pipeline: RenderPipeline,
-    pub rt_tex_id: TextureId,
+    pub rt_key: RegistryKey,
 }
 
 
-impl CanvasLightPipeline {
-    pub fn new(rt_tex_id: TextureId, device: &wgpu::Device) -> Self {
+impl ViewportLightGizmoPipeline {
+    pub fn new(rt_key: RegistryKey) -> Self {
+        let device = &GLOBALS.get().device;
         let shader_module = device.create_shader_module(&wgpu::include_wgsl!("light_gizmo.wgsl"));
 
         let uniform_buffer = device.create_buffer(&BufferDescriptor {
-            label: Some("canvas light gizmo uniform buffer"),
+            label: Some("viewport light gizmo uniform buffer"),
             size: 80,
             usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST,
             mapped_at_creation: false,
@@ -41,7 +42,7 @@ impl CanvasLightPipeline {
         });
 
         let uniform_bind_group = device.create_bind_group(&BindGroupDescriptor {
-            label: Some("canvas light gizmo bind group"),
+            label: Some("viewport light gizmo bind group"),
             layout: &uniform_layout,
             entries: &[BindGroupEntry {
                 binding: 0,
@@ -50,13 +51,13 @@ impl CanvasLightPipeline {
         });
 
         let pipeline_layout = device.create_pipeline_layout(&PipelineLayoutDescriptor {
-            label: Some("canvas light gizmo pipeline layout"),
+            label: Some("viewport light gizmo pipeline layout"),
             bind_group_layouts: &[&uniform_layout],
             push_constant_ranges: &[],
         });
 
         let pipeline = device.create_render_pipeline(&RenderPipelineDescriptor {
-            label: Some("canvas light gizmo pipeline"),
+            label: Some("viewport light gizmo pipeline"),
             layout: Some(&pipeline_layout),
             vertex: VertexState {
                 module: &shader_module,
@@ -83,38 +84,30 @@ impl CanvasLightPipeline {
             &[27u16, 60, 28, 14, 47, 15, 2, 33, 34, 28, 61, 29, 15, 48, 16, 2, 35, 3, 30, 61, 62, 16, 49, 17, 3, 36, 4, 30, 63, 31, 17, 50, 18, 5, 36, 37, 31, 0, 32, 19, 50, 51, 5, 38, 6, 32, 0, 1, 19, 52, 20, 6, 39, 7, 20, 53, 21, 7, 40, 8, 22, 53, 54, 9, 40, 41, 22, 55, 23, 9, 42, 10, 23, 56, 24, 10, 43, 11, 25, 56, 57, 11, 44, 12, 25, 58, 26, 13, 44, 45, 26, 59, 27, 13, 46, 14, 27, 59, 60, 14, 46, 47, 2, 1, 33, 28, 60, 61, 15, 47, 48, 2, 34, 35, 30, 29, 61, 16, 48, 49, 3, 35, 36, 30, 62, 63, 17, 49, 50, 5, 4, 36, 31, 63, 32, 19, 18, 50, 5, 37, 38, 32, 1, 33, 19, 51, 52, 6, 38, 39, 20, 52, 53, 7, 39, 40, 22, 21, 53, 9, 8, 40, 22, 54, 55, 9, 41, 42, 23, 55, 56, 10, 42, 43, 25, 24, 56, 11, 43, 44, 25, 57, 58, 13, 12, 44, 26, 58, 59, 13, 45, 46, 64, 65, 66, 64, 66, 67, 64, 67, 68, 64, 68, 69, 64, 69, 70, 64, 70, 71, 64, 71, 72, 64, 72, 73, 64, 73, 74, 64, 74, 75, 64, 75, 76, 64, 76, 77, 64, 77, 78, 64, 78, 79, 64, 79, 80, 64, 80, 65],
             Some("canvas light gizmo geometry"), &device);
 
-        CanvasLightPipeline {
+        ViewportLightGizmoPipeline {
             uniform_buffer,
             uniform_bind_group,
             gizmo_vg,
             pipeline,
-            rt_tex_id,
+            rt_key,
         }
     }
 
-    pub fn update_uniforms(&self, queue: &wgpu::Queue, m: &[[f32; 4]; 4], color: wgpu::Color) {
+    pub fn update_uniforms(&self, m: &[[f32; 4]; 4], color: toolbelt::Color) {
         let data = [
             m[0], m[1], m[2], m[3],
-            [color.r as f32, color.g as f32, color.b as f32, color.a as f32]
+            *color.components_4()
         ];
-        queue.write_buffer(&self.uniform_buffer, 0, bytemuck::bytes_of(&data));
+        GLOBALS.get().queue.write_buffer(&self.uniform_buffer, 0, bytemuck::bytes_of(&data));
     }
-}
 
-
-impl SimpleGeometryPipeline for CanvasLightPipeline {
-    fn uniform_buffer(&self) -> &Buffer { &self.uniform_buffer }
-    fn uniform_bind_group(&self) -> &BindGroup { &self.uniform_bind_group }
-    fn vertex_group(&self) -> &VertexGroup { &self.gizmo_vg }
-    fn pipeline(&self) -> &RenderPipeline { &self.pipeline }
-
-    fn render(&self, encoder: &mut wgpu::CommandEncoder, imgui_renderer: &Renderer, _registry: &TextureRegistry) {
-        let view = imgui_renderer.textures.get(self.rt_tex_id).expect("Failed to retrieve render target texture").view();
+    pub fn render(&self, encoder: &mut wgpu::CommandEncoder, registry: &TextureRegistry) {
+        let view = registry.find(self.rt_key).expect("Failed to retrieve render target texture").view();
 
         let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
             label: Some("canvas light gizmo renderpass"),
             color_attachments: &[wgpu::RenderPassColorAttachment {
-                view,
+                view: &*view,
                 resolve_target: None,
                 ops: wgpu::Operations { load: wgpu::LoadOp::Load, store: true },
             }],

@@ -1,12 +1,11 @@
 use wgpu::*;
-use imgui_wgpu::Renderer;
 use crate::geometry::VertexGroup;
 
 
 pub mod sprite;
-pub use sprite::CanvasSpritePipeline;
+pub use sprite::ViewportSpritePipeline;
 pub mod light;
-pub use light::CanvasLightPipeline;
+pub use light::ViewportLightGizmoPipeline;
 use crate::registry::TextureRegistry;
 
 
@@ -20,8 +19,8 @@ const PRIMITIVE_STATE: PrimitiveState = PrimitiveState {
     conservative: false,
 };
 
-const COLOR_TARGET_STATE: ColorTargetState = ColorTargetState {
-    format: TextureFormat::Rgba8Unorm,
+pub const COLOR_TARGET_STATE: ColorTargetState = ColorTargetState {
+    format: TextureFormat::Bgra8UnormSrgb,
     blend: Some(BlendState {
         color: BlendComponent {
             src_factor: BlendFactor::SrcAlpha,
@@ -44,5 +43,5 @@ pub trait SimpleGeometryPipeline {
     fn vertex_group(&self) -> &VertexGroup;
     fn pipeline(&self) -> &RenderPipeline;
 
-    fn render(&self, encoder: &mut wgpu::CommandEncoder, imgui_renderer: &Renderer, registry: &TextureRegistry);
+    fn render(&self, encoder: &mut wgpu::CommandEncoder, registry: &TextureRegistry);
 }
